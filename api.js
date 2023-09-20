@@ -1,4 +1,4 @@
-const db = require("./db");
+// const client = require("./db");
 const {
     GetItemCommand,
     PutItemCommand,
@@ -17,7 +17,7 @@ const getPost = async (event) => {
             TableName: process.env.DYNAMODB_TABLE_NAME,
             Key: marshall({ postId: event.pathParameters.postId }),
         };
-        const { Item } = await db.send(new GetItemCommand(params));
+        const { Item } = await client.send(new GetItemCommand(params));
         console.log({ Item });
         response.body = JSON.stringify({
             message: "Successfully retrieved post.",
@@ -43,7 +43,7 @@ const createPost = async (event) => {
             TableName: process.env.DYNAMODB_TABLE_NAME,
             Item: marshall(body || {}),
         };
-        const createResult = await db.send(new PutItemCommand(params));
+        const createResult = await client.send(new PutItemCommand(params));
         response.body = JSON.stringify({
             message: "Successfully created post.",
             createResult,
@@ -77,7 +77,7 @@ const updatePost = async (event) => {
                 [`:value${index}`]: body[key],
             }), {})),
         };
-        const updateResult = await db.send(new UpdateItemCommand(params));
+        const updateResult = await client.send(new UpdateItemCommand(params));
         response.body = JSON.stringify({
             message: "Successfully updated post.",
             updateResult,
@@ -100,7 +100,7 @@ const deletePost = async (event) => {
             TableName: process.env.DYNAMODB_TABLE_NAME,
             Key: marshall({ postId: event.pathParameters.postId }),
         };
-        const deleteResult = await db.send(new DeleteItemCommand(params));
+        const deleteResult = await client.send(new DeleteItemCommand(params));
         response.body = JSON.stringify({
             message: "Successfully deleted post.",
             deleteResult,
@@ -119,7 +119,7 @@ const deletePost = async (event) => {
 const getAllPosts = async () => {
     const response = { statusCode: 200 };
     try {
-        const { Items } = await db.send(new ScanCommand({ TableName: process.env.DYNAMODB_TABLE_NAME }));
+        const { Items } = await client.send(new ScanCommand({ TableName: process.env.DYNAMODB_TABLE_NAME }));
         response.body = JSON.stringify({
             message: "Successfully retrieved all posts.",
             data: Items.map((item) => unmarshall(item)),
